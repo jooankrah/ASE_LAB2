@@ -102,11 +102,12 @@ void can_receive(CANRxFrame crfp) {
     if(crfp.IDE == CAN_IDE_STD) // a standard message frame has been received
     {
         /* TO-DO: your task implementations ******************************/
+		LED_Rx = !LED_Rx; // toggle the LED_Rx to indicate a message has been received
 
-        //if (crfp.SID == ...) // check the Message ID
-        //{
-
-        //}
+        if (crfp.SID == 0x11) // check the Message ID
+        {
+			LED_U1 = !LED_U1; // toggle the LED_U1 to indicate a message with ID 0x11 has been received
+		}
     }
 }
 
