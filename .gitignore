@@ -1,0 +1,29 @@
+# Build outputs
+/bin/
+/build/
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.exe
+
+# Debug and crash files
+*.d
+*.map
+*.log
+*.pdb
+*.stackdump
+
+# IDE and editor files
+.vscode/*.code-workspace
+.vs/
+*.suo
+*.user
+
+# Temporary and operating-system files
+*~
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db
