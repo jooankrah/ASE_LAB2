@@ -51,9 +51,9 @@ void SIU_Init(void){
 	// SIU.PCR[...].B.IBE = ...;
 
 	/* RX - receiving */
-	// SIU.PCR[...].B.PA = ...;
-	// SIU.PCR[...].B.OBE = ...;
-	// SIU.PCR[...].B.IBE = ...;
+	SIU.PCR[17].B.PA = 1;
+	SIU.PCR[17].B.OBE = 0;
+	SIU.PCR[17].B.IBE = 1;
 
 	SIU.PSMI[0].B.PADSEL = 0x1;
 	SIU.PSMI[33].B.PADSEL = 0x1;
