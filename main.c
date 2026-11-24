@@ -63,8 +63,8 @@ void can_send_speed(int value){
 
 void can_send_rpm(int value){
 	/* TO-DO: your task implementations **************************************/
-	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[0] = (value >> 8) & 0xFF; // set the first byte of the payload to the high byte of the rpm value
-	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[1] = value & 0xFF; // set the second byte of the payload to the low byte of the rpm value
+	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[0] = value & 0xFF; // set the first byte of the payload to the lower 8 bits of the rpm value
+	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[1] = (value >> 8) & 0xFF; // set the second byte of the payload to the upper 8 bits of the rpm value
 	CAN_0.BUF[CAN_TX_RPM_MB].CS.B.CODE = 0xC; // instruct the CAN controller to transmit the CAN message
 	LED_Tx = !LED_Tx; // toggle the LED_Tx to indicate a message has been transmitted
 }
