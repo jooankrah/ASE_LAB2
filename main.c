@@ -13,6 +13,7 @@
 /* Global variables **********************************************************/
 int speed = 0;
 int rpm = 0;
+static volatile int engine_on = 0;
 
 int calculated_speed(int pot_value){
 	if (pot_value < 0)
@@ -99,6 +100,9 @@ void can_send_lights(void){
 void can_send(void){
 
 	/* TO-DO: your task implementations **************************************/
+	if (!engine_on){
+		return; // if the engine is not on, do not send any CAN messages
+	}
 	speed = calculated_speed(POT); // read the potentiometer value and calculate the speed
 	rpm = calculated_rpm(); // calculate the rpm value
 	can_send_engine_on();
@@ -162,7 +166,13 @@ void can_receive(CANRxFrame crfp) {
 
         if (crfp.SID == 0x11) // check the Message ID
         {
+			engine_on = 1; // set the engine_on flag to indicate that a message with ID 0x11 has been received
 			LED_U1 = !LED_U1; // toggle the LED_U1 to indicate a message with ID 0x11 has been received
+		}
+		else if (crfp.SID == 0x10) // check the Message ID
+		{
+			engine_on = 0; // set the engine_on flag to indicate that a message with ID 0x10 has been received
+			LED_P = 0; 
 		}
     }
 }
