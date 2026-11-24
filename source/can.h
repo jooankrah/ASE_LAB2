@@ -19,6 +19,10 @@
 /* Macro definitions *********************************************************/
 #define	CAN_MASK_REGISTER			0x7FE // 
 #define	CAN_ACCEPTANCE_REGISTER  	0x10 // 
+#define CAN_TX_ENGINE_MB	8U
+#define CAN_TX_SPEED_MB	9U
+#define CAN_TX_RPM_MB	10U
+#define CAN_TX_LIGHTS_MB	11U
 
 
 /*****************************************************************************/
