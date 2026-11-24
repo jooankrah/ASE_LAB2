@@ -15,10 +15,17 @@ int speed = 0;
 int rpm = 0;
 
 int calculated_speed(int pot_value){
-	if(pot_value > 4095){
-		pot_value = 4095;
-	}
-	return(pot_value * 240 ) / 4095;
+	if (pot_value < 0)
+{
+    pot_value = 0;
+}
+
+if (pot_value > 4095)
+{
+    pot_value = 4095;
+}
+
+return (pot_value * 240) / 4095;
 }
 
 int calculated_rpm(){
