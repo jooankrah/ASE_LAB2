@@ -46,9 +46,9 @@ void SIU_Init(void){
 	/* Setup CAN controller pins */
 
 	/* TX - transmitting */
-	// SIU.PCR[...].B.PA = ...;
-	// SIU.PCR[...].B.OBE = ...;
-	// SIU.PCR[...].B.IBE = ...;
+	SIU.PCR[16].B.PA = 1;
+	SIU.PCR[16].B.OBE = 1;
+	SIU.PCR[16].B.IBE = 0;
 
 	/* RX - receiving */
 	SIU.PCR[17].B.PA = 1;
