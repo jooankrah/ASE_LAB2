@@ -14,41 +14,90 @@
 int speed = 0;
 int rpm = 0;
 
+int calculated_speed(int pot_value){
+	if(pot_value > 4095){
+		pot_value = 4095;
+	}
+	return(pot_value * 240 ) / 4095;
+}
+
+int calculated_rpm(){
+	static int rpm_value = 8000;
+	static int step = -250;
+	uint current_rpm =(int)rpm_value;
+
+	rpm_value += step;
+
+	if(rpm_value <= 0){
+		rpm_value = 0;
+		step = 250;
+	}
+	else if(rpm_value >= 8000){
+		rpm_value = 8000;
+		step = -250;
+	}
+	return current_rpm;
+}
 
 void can_send_engine_on(void){
 
 	/* TO-DO: your task implementations **************************************/
-
-    // set payload bytes, if necessary
-    // CAN_0.BUF[...].DATA.B[...] = ...;
-
 	// write the correct CODE value to this register to instruct the CAN controller to transmit the CAN message
-	// CAN_0.BUF[...].CS.B.CODE = ...;
+	CAN_0.BUF[CAN_TX_ENGINE_MB].CS.B.CODE = 0xC;
+	LED_Tx = !LED_Tx; // toggle the LED_Tx to indicate a message has been transmitted
 }
 
 void can_send_speed(int value){
 	/* TO-DO: your task implementations **************************************/
-
-
+	CAN_0.BUF[CAN_TX_SPEED_MB].DATA.B[0] = value; // set the first byte of the payload to the speed value
+	CAN_0.BUF[CAN_TX_SPEED_MB].CS.B.CODE = 0xC; // instruct the CAN controller to transmit the CAN message
+	LED_Tx = !LED_Tx; // toggle the LED_Tx to indicate a message has been transmitted
 }
 
 void can_send_rpm(int value){
 	/* TO-DO: your task implementations **************************************/
-
-
-
+	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[0] = (value >> 8) & 0xFF; // set the first byte of the payload to the high byte of the rpm value
+	CAN_0.BUF[CAN_TX_RPM_MB].DATA.B[1] = value & 0xFF; // set the second byte of the payload to the low byte of the rpm value
+	CAN_0.BUF[CAN_TX_RPM_MB].CS.B.CODE = 0xC; // instruct the CAN controller to transmit the CAN message
+	LED_Tx = !LED_Tx; // toggle the LED_Tx to indicate a message has been transmitted
 }
 
 void can_send_lights(void){
 	/* TO-DO: your task implementations **************************************/
-
-
-
+	int lights_state = 0x00; // initialize the lights state variable to 0
+	if (SW1 == 0 && SW2 == 1)
+	{
+		// left turn signal
+		lights_state = 0x01; // set the lights state to 1 if SW1 is pressed and SW2 is not pressed
+	}
+	else if (SW1 == 1 && SW2 == 0)
+	{
+		// right turn signal
+		lights_state = 0x02; // set the lights state to 2 if SW2 is pressed and SW1 is not pressed
+	}
+	else if (SW1 == 0 && SW2 == 0)
+	{
+		// hazard lights
+		lights_state = 0x03; // set the lights state to 3 if both SW1 and SW2 are pressed
+	}
+	else
+	{
+		lights_state = 0x00; // set the lights state to 0 if neither SW1 nor SW2 are pressed
+	}
+	CAN_0.BUF[CAN_TX_LIGHTS_MB].DATA.B[0] = lights_state; // set the first byte of the payload to the lights state
+	CAN_0.BUF[CAN_TX_LIGHTS_MB].CS.B.CODE = 0xC; // instruct the CAN controller to transmit the CAN message
+	LED_Tx = !LED_Tx; // toggle the LED_Tx to indicate a message has been transmitted
 }
 
 void can_send(void){
 
 	/* TO-DO: your task implementations **************************************/
+	speed = calculated_speed(POT); // read the potentiometer value and calculate the speed
+	rpm = calculated_rpm(); // calculate the rpm value
+	can_send_engine_on();
+	can_send_speed(speed);
+	can_send_rpm(rpm);
+	can_send_lights();
 
 	/*************************************************************************/
 }
