@@ -12,27 +12,24 @@
 
 /* Global variables **********************************************************/
 int speed = 0;
-int rpm = 0;
+int rpm = 8000;
 static volatile int engine_on = 0;
+static volatile int lights_state = 0;
 
 int calculated_speed(int pot_value){
-	if (pot_value < 0)
-{
-    pot_value = 0;
-}
-
-if (pot_value > 4095)
-{
-    pot_value = 4095;
-}
-
-return (pot_value * 240) / 4095;
+	if (pot_value < 0) {
+		pot_value = 0;
+	}
+	if (pot_value > 4095) {
+		pot_value = 4095;
+	}
+	return (pot_value * 240) / 4095;
 }
 
 int calculated_rpm(){
 	static int rpm_value = 8000;
 	static int step = -250;
-	uint current_rpm =(int)rpm_value;
+	int current_rpm = rpm_value;
 
 	rpm_value += step;
 
@@ -69,38 +66,33 @@ void can_send_rpm(int value){
 
 void can_send_lights(void){
 	/* TO-DO: your task implementations **************************************/
-	int lights_state = 0x00; // initialize the lights state variable to 0
 	if (SW1 == 0 && SW2 == 1)
 	{
-		// left turn signal
-		lights_state = 0x01; // set the lights state to 1 if SW1 is pressed and SW2 is not pressed
+		lights_state = 0x01;
 	}
 	else if (SW1 == 1 && SW2 == 0)
 	{
-		// right turn signal
-		lights_state = 0x02; // set the lights state to 2 if SW2 is pressed and SW1 is not pressed
+		lights_state = 0x02;
 	}
-	else if (SW1 == 0 && SW2 == 0)
+	else if (SW1 == 1 && SW2 == 1)
 	{
-		// hazard lights
-		lights_state = 0x03; // set the lights state to 3 if both SW1 and SW2 are pressed
+		lights_state = 0x03;
 	}
 	else
 	{
-		lights_state = 0x00; // set the lights state to 0 if neither SW1 nor SW2 are pressed
+		lights_state = 0x00;
 	}
-	CAN_0.BUF[CAN_TX_LIGHTS_MB].DATA.B[0] = lights_state; // set the first byte of the payload to the lights state
-	CAN_0.BUF[CAN_TX_LIGHTS_MB].CS.B.CODE = 0xC; // instruct the CAN controller to transmit the CAN message
+	CAN_0.BUF[CAN_TX_LIGHTS_MB].DATA.B[0] = lights_state;
+	CAN_0.BUF[CAN_TX_LIGHTS_MB].CS.B.CODE = 0xC;
 }
 
 void can_send(void){
 
 	/* TO-DO: your task implementations **************************************/
 	if (!engine_on){
-		return; // if the engine is not on, do not send any CAN messages
+		return;
 	}
 	speed = calculated_speed(POT); // read the potentiometer value and calculate the speed
-	rpm = calculated_rpm(); // calculate the rpm value
 	can_send_engine_on();
 	can_send_speed(speed);
 	can_send_rpm(rpm);
@@ -120,12 +112,18 @@ int main(void) {
 	/* peripherals initialization */
 	peripheralsInit();
 
-
-
 	/* TO-DO: your task implementations **************************************/
 
 	/* Configure and start timer channels */
-	/* PIT timer channel 1, period = 1000 ms */
+	PIT_ConfigureTimer(1, 100);
+	PIT_StartTimer(1);
+	PIT_ConfigureTimer(2, 1000);
+	PIT_StartTimer(2);
+	PIT_ConfigureTimer(3, 500);
+	PIT_StartTimer(3);
+	LED_P = 0;
+	LED_U1 = 0;
+	LED_U3 = 0;
 
 	/*************************************************************************/
 
@@ -134,12 +132,6 @@ int main(void) {
 	while(1){
 		/* System function */
 		systemFunction();
-
-		/* TO-DO: your task implementations **********************************/
-
-		can_send();
-
-		/*********************************************************************/
 
 		/* 10 ms OS delay */
 		osalThreadDelayMilliseconds(10UL);
@@ -163,12 +155,15 @@ void can_receive(CANRxFrame crfp) {
         if (crfp.SID == 0x11) // check the Message ID
         {
 			engine_on = 1; // set the engine_on flag to indicate that a message with ID 0x11 has been received
-			LED_U1 = !LED_U1; // toggle the LED_U1 to indicate a message with ID 0x11 has been received
+			LED_P = 1;
 		}
 		else if (crfp.SID == 0x10) // check the Message ID
 		{
 			engine_on = 0; // set the engine_on flag to indicate that a message with ID 0x10 has been received
-			LED_P = 0; 
+			LED_P = 0;
+			lights_state = 0;
+			LED_U1 = 0;
+			LED_U3 = 0;
 		}
     }
 }
@@ -182,8 +177,10 @@ void can_receive(CANRxFrame crfp) {
  */
 void PIT_Channel_1(void){
 	/* TO-DO: your task implementations **************************************/
-
-
+	PIT.CHANNEL[1].TFLG.R = 1U;
+	if (engine_on) {
+		can_send();
+	}
 }
 
 
@@ -195,7 +192,10 @@ void PIT_Channel_1(void){
  */
 void PIT_Channel_2(void){
 	/* TO-DO: your task implementations **************************************/
-
+	PIT.CHANNEL[2].TFLG.R = 1U;
+	if (engine_on) {
+		rpm = calculated_rpm();
+	}
 }
 
 
@@ -207,6 +207,23 @@ void PIT_Channel_2(void){
  */
 void PIT_Channel_3(void){
 	/* TO-DO: your task implementations **************************************/
-
-
+	PIT.CHANNEL[3].TFLG.R = 1U;
+	switch (lights_state) {
+	case 0x01:
+		LED_U1 = !LED_U1;
+		LED_U3 = 0;
+		break;
+	case 0x02:
+		LED_U1 = 0;
+		LED_U3 = !LED_U3;
+		break;
+	case 0x03:
+		LED_U1 = !LED_U1;
+		LED_U3 = !LED_U3;
+		break;
+	default:
+		LED_U1 = 0;
+		LED_U3 = 0;
+		break;
+	}
 }
