@@ -28,6 +28,7 @@ void CAN_Init(void){
 	CAN_0.BUF[CAN_TX_ENGINE_MB].MSG_ID.B.EXT_ID = 0xDA0;		/* Message ID for extended frame*/
 	CAN_0.BUF[CAN_TX_ENGINE_MB].MSG_CS.B.RTR = 0;		/* Remote Transmission Request; 0 = Data Frame */
 	CAN_0.BUF[CAN_TX_ENGINE_MB].CS.B.LENGTH = 0;			/* Length of Payload, 0 - 8*/
+	CAN_0.BUF[CAN_TX_ENGINE_MB].CS.B.CODE = 0x8;
 
 	// Configure the message buffer for transmitting Speed message
 	CAN_0.BUF[CAN_TX_SPEED_MB].MSG_CS.B.IDE = 0;		/* Message/frame format: 1 = Extended, 0 = Standard/Base */
@@ -35,6 +36,7 @@ void CAN_Init(void){
 	CAN_0.BUF[CAN_TX_SPEED_MB].MSG_ID.B.EXT_ID = 0x0;		/* Message ID for extended frame*/
 	CAN_0.BUF[CAN_TX_SPEED_MB].MSG_CS.B.RTR = 0;		/* Remote Transmission Request; 0 = Data Frame */
 	CAN_0.BUF[CAN_TX_SPEED_MB].CS.B.LENGTH = 1;			/* Length of Payload, 0 - 8*/
+	CAN_0.BUF[CAN_TX_SPEED_MB].CS.B.CODE = 0x8;
 
 	// Configure the message buffer for transmitting RPM message
 	CAN_0.BUF[CAN_TX_RPM_MB].MSG_CS.B.IDE = 0;		/* Message/frame format: 1 = Extended, 0 = Standard/Base */
@@ -42,6 +44,7 @@ void CAN_Init(void){
 	CAN_0.BUF[CAN_TX_RPM_MB].MSG_ID.B.EXT_ID = 0x0;		/* Message ID for extended frame*/
 	CAN_0.BUF[CAN_TX_RPM_MB].MSG_CS.B.RTR = 0;		/* Remote Transmission Request; 0 = Data Frame */
 	CAN_0.BUF[CAN_TX_RPM_MB].CS.B.LENGTH = 2;			/* Length of Payload, 0 - 8*/
+	CAN_0.BUF[CAN_TX_RPM_MB].CS.B.CODE = 0x8;
 
 	// Configure the message buffer for transmitting Lights message
 	CAN_0.BUF[CAN_TX_LIGHTS_MB].MSG_CS.B.IDE = 0;		/* Message/frame format: 1 = Extended, 0 = Standard/Base */
@@ -49,6 +52,7 @@ void CAN_Init(void){
 	CAN_0.BUF[CAN_TX_LIGHTS_MB].MSG_ID.B.EXT_ID = 0x0;		/* Message ID for extended frame*/
 	CAN_0.BUF[CAN_TX_LIGHTS_MB].MSG_CS.B.RTR = 0;		/* Remote Transmission Request; 0 = Data Frame */
 	CAN_0.BUF[CAN_TX_LIGHTS_MB].CS.B.LENGTH = 1;			/* Length of Payload, 0 - 8*/
+	CAN_0.BUF[CAN_TX_LIGHTS_MB].CS.B.CODE = 0x8;
 
 	/*************************************************************************/
 }
