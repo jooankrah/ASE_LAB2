@@ -15,6 +15,7 @@ int speed = 0;
 int rpm = 8000;
 static volatile int engine_on = 0;
 static volatile int lights_state = 0;
+static volatile int indicator_phase = 0;
 
 int calculated_speed(int pot_value){
 	if (pot_value < 0) {
@@ -210,18 +211,22 @@ void PIT_Channel_3(void){
 	PIT.CHANNEL[3].TFLG.R = 1U;
 	switch (lights_state) {
 	case 0x01:
-		LED_U1 = !LED_U1;
+		indicator_phase = !indicator_phase;
+		LED_U1 = indicator_phase;
 		LED_U3 = 0;
 		break;
 	case 0x02:
+		indicator_phase = !indicator_phase;
 		LED_U1 = 0;
-		LED_U3 = !LED_U3;
+		LED_U3 = indicator_phase;
 		break;
 	case 0x03:
-		LED_U1 = !LED_U1;
-		LED_U3 = !LED_U3;
+		indicator_phase = !indicator_phase;
+		LED_U1 = indicator_phase;
+		LED_U3 = indicator_phase;
 		break;
 	default:
+		indicator_phase = 0;
 		LED_U1 = 0;
 		LED_U3 = 0;
 		break;
